@@ -12,6 +12,8 @@ This report is finally uploaded to S3 bucket and a public URL is generated.
 Sample report created and uploaded to S3.
 https://mt-daily-lessons-report.s3.ap-south-1.amazonaws.com/daily_lessons_report.csv
 
+As part of project exension it also sends the report to the recipient email address using AWS SES.
+
 ## How to run?
 
 **Prerequisites:**
@@ -45,7 +47,7 @@ cp .env.example .env
 ```bash
 docker compose up --build
 ```
-6. Visit http://localhost:8082 in your browser and login to using below credentials.
+6. Visit http://localhost:8082 in your browser and login using below credentials.
 ```bash
 username: admin
 password: admin
