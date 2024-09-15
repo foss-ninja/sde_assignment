@@ -1,0 +1,6 @@
+apache-airflow==2.10.1
+python-dotenv==1.0.1
+psycopg2-binary==2.9.9
+mysqlclient==2.2.4
+pandas==2.2.2
+boto3==1.35.19
