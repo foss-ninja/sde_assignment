@@ -1,6 +1,8 @@
-import os
+from datetime import datetime
 
-from utils.core_utils import generate_csv_report, get_boto_client, upload_file_to_s3
+from config import settings
+from utils.aws_utils import get_boto_client, upload_file_to_s3
+from utils.core_utils import generate_csv_report, send_report_on_mail
 from utils.extract_data_utils import extract_mysql_data, extract_postgres_data
 from utils.transform_data_utils import transform_data
 
@@ -23,9 +25,10 @@ def main():
     report_data = transform_data(users_data=users_data, lessons_data=lessons_data)
 
     # export data
-    file_name = f"{os.getenv('REPORT_FILE_NAME')}.csv"
+    file_name = f"{settings.report_file_name}_{datetime.now().strftime('-%Y-%m-%d_%H-%M-%S')}.csv"
     generate_csv_report(report_df=report_data, file_name=file_name)
     upload_file_to_s3(s3_client=get_boto_client("s3"), file_name=file_name)
+    send_report_on_mail(file_name=file_name)
 
 
 if __name__ == "__main__":

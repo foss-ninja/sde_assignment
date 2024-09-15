@@ -1,26 +1,14 @@
-import os
+"""
+This module provides utility functions to extract data from different sources.
+
+Extract data from databases:
+    - extract_postgres_data() to extract data from PostgreSQL
+    - extract_mysql_data() to extract data from MySQL
+"""
 
 import pandas as pd
-from dotenv import load_dotenv
+from config import settings
 from sqlalchemy import create_engine
-
-load_dotenv(dotenv_path="../setup/.env")
-
-# PostgreSQL connection details
-POSTGRES_USER = os.getenv("POSTGRES_USER")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
-POSTGRES_DB = os.getenv("POSTGRES_DB")
-POSTGRES_HOST = os.getenv("POSTGRES_HOST")
-POSTGRES_PORT = os.getenv("POSTGRES_PORT")
-POSTGRES_DATABASE_URI = os.getenv("POSTGRES_DATABASE_URI")
-
-# MySQL connection details
-MYSQL_USER = os.getenv("MYSQL_USER")
-MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-MYSQL_DB = os.getenv("MYSQL_DATABASE")
-MYSQL_HOST = os.getenv("MYSQL_HOST")
-MYSQL_PORT = os.getenv("MYSQL_PORT")
-MYSQL_DATABASE_URI = os.getenv("MYSQL_DATABASE_URI")
 
 # SQL Queries
 POSTGRES_QUERY = """
@@ -44,7 +32,7 @@ def connect_to_postgres():
     Returns:
         connection: A database connection object.
     """
-    engine = create_engine(POSTGRES_DATABASE_URI)
+    engine = create_engine(settings.postgres_url.get_secret_value())
     connection = engine.connect()
     return connection.connection
 
@@ -56,7 +44,7 @@ def connect_to_mysql():
     Returns:
         connection: A database connection object.
     """
-    engine = create_engine(MYSQL_DATABASE_URI)
+    engine = create_engine(settings.mysql_url.get_secret_value())
     connection = engine.connect()
     return connection.connection
 

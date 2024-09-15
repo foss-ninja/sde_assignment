@@ -1,3 +1,11 @@
+"""
+This module provides utility functions to transform the extracted data to the required format.
+
+The transformation functions:
+    - transform_data() to transform the given user and lessons data into the required format.
+
+"""
+
 import pandas as pd
 
 

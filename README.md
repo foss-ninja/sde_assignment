@@ -94,3 +94,17 @@ cp -r ../report_generator /opt/airflow/dags
 ```
 
 2. Go to airflow console and run the dag
+
+
+---
+
+## Project Extension
+
+**Send report on email**
+
+Since generating just csv file and uploading to S3 is not bringing oberservable value hence this projects
+extends to send the report on the email to the configured recipients.
+
+Sample Email Screenshot
+
+![Example Email](output/email.png)

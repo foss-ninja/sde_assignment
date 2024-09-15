@@ -1,60 +1,36 @@
-import os
+"""
+This module provides utility functions to interact with the report data.
 
-import boto3
+The functions:
+    - generate_csv_report() to generate a CSV report from given Pandas DataFrame
+      and save it to a given file_name
+    - send_report_on_mail() to send a CSV report to a recipient email address
+      using AWS SES
+
+"""
+
 import pandas as pd
-from dotenv import load_dotenv
+from config import settings
+from utils.aws_utils import send_email_via_ses
 
-load_dotenv(dotenv_path="../setup/.env")
+email_subject = "MT | Daily Lessons Completed Report"
+email_body = """
+    Dear Recipients,
+    Please find attached the daily lessons completed report for the last year. \n
+    This report provides a summary of the number of lessons completed by users on a daily basis.
 
+    The report is based on data extracted from our PostgreSQL and MySQL databases, \n
+    and is intended to provide insights into user engagement and lesson completion trends.
 
-# AWS S3 credentials and bucket info
-AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
-S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
+    If you have any questions or would like to discuss the report in more detail, \n
+    feel free to reach out to us.
 
-
-def get_boto_client(service_name):
+    Best regards,
+    Team MT
     """
-    Creates a boto3 client for the given service name.
-
-    :param service_name: The name of the AWS service to create a client for
-    :return: A boto3 client instance for the given service name
-    """
-    return boto3.client(
-        service_name,
-        aws_access_key_id=AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-        region_name=AWS_REGION,
-    )
 
 
-def upload_file_to_s3(s3_client, file_name):
-    """
-    Uploads the given file to the specified S3 bucket and returns the public URL of the uploaded file.
-
-    :param s3_client: A boto3 client instance for the S3 service
-    :param file_name: The name of the file to upload
-    :return: A string representing the public URL of the uploaded file
-    """
-    try:
-        # upload file
-        print(f"Uploading file: {file_name} to S3 bucket '{S3_BUCKET_NAME}'")
-        s3_client.upload_file(file_name, S3_BUCKET_NAME, file_name)
-        print(f"File uploaded to S3 bucket '{S3_BUCKET_NAME}' as '{file_name}'")
-
-        # Generate the public URL
-        public_url = (
-            f"https://{S3_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{file_name}"
-        )
-        print(f"Public URL for the file: {public_url}")
-        return public_url
-
-    except Exception as e:
-        print(f"Error uploading file: {str(e)}")
-
-
-def generate_csv_report(report_df: pd.DataFrame, file_name: str):
+def generate_csv_report(report_df: pd.DataFrame, file_name: str) -> None:
     """
     Generates a CSV report from given Pandas DataFrame and saves it to a given file_name.
 
@@ -67,3 +43,27 @@ def generate_csv_report(report_df: pd.DataFrame, file_name: str):
     """
     report_df.to_csv(file_name, index=False)
     print(f"Report generated successfully with name: {file_name}")
+
+
+def send_report_on_mail(file_name: str) -> bool:
+    """
+    Sends a CSV report to a recipient email address using AWS SES.
+
+    Parameters
+    ----------
+    file_name : str
+        Name of the file containing the report data
+    """
+    is_sent = send_email_via_ses(
+        sender=settings.sender_email,
+        recipients=settings.recipient_emails.split(","),
+        subject=email_subject,
+        body_text=email_body,
+        attachment_file=file_name,
+    )
+    if is_sent:
+        print(f"Report sent successfully to recipients: {settings.recipient_emails}")
+        return True
+    else:
+        print(f"Failed to send report with name: {file_name}")
+        return False
