@@ -1,0 +1,27 @@
+FROM apache/airflow:2.10.1-python3.12
+
+USER airflow
+
+# Copy requirements file
+COPY ../requirements.txt .
+
+# Install dependencies
+RUN pip install -r requirements.txt
+
+# Disable example dags from airflow
+ENV AIRFLOW__CORE__LOAD_EXAMPLES=False
+
+# Initialize the database required by airflow
+RUN airflow db init
+
+# Create a default user to access airflow dashboard
+RUN airflow users create \
+    --username admin \
+    --firstname Admin \
+    --lastname User \
+    --role Admin \
+    --email admin@example.com \
+    --password admin
+
+# Run airflow standalone - aiflow webserver and scheduler
+CMD ["airflow", "standalone"]

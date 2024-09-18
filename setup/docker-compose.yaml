@@ -1,24 +1,53 @@
 version: '3.8'
 
 services:
+  mt-airflow:
+    build:
+      context: ..
+      dockerfile: setup/Dockerfile-Airflow
+    container_name: mt-airflow
+    env_file: .env
+    environment:
+      - AIRFLOW__WEBSERVER__WEB_SERVER_MASTER_TIMEOUT=300 # solve - No response from gunicorn master within 120 seconds
+      - AIRFLOW__CORE__DAGBAG_IMPORT_TIMEOUT=300 # solve - pandas taking significant time for first import
+    volumes: # volume will avoid building setps for source code changes
+      - ../report_generator:/opt/airflow/dags
+    ports:
+      - "8082:8080"
+    networks:
+      - my_network
+
   mt-postgres:
     build:
       dockerfile: Dockerfile-PG
     image: postgres:latest
+    container_name: mt-postgres
     env_file: .env
     ports:
-      - "5432:5432"
+      - "5436:5432"
     networks:
       - my_network
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: '1G'
+
   mt-mysql:
     build:
       dockerfile: Dockerfile-MySQL
     image: mysql:latest
+    container_name: mt-mysql
     env_file: .env
     ports:
-      - "3306:3306"
+      - "3308:3306"
     networks:
       - my_network
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: '1G'
 
 networks:
   my_network:
